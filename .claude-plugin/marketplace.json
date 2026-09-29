@@ -1,0 +1,17 @@
+{
+  "name": "kannankaruppaiya",
+  "description": "Claude Code plugins by Kannankaruppaiya",
+  "owner": {
+    "name": "Kannankaruppaiya",
+    "url": "https://github.com/Kannankaruppaiya"
+  },
+  "plugins": [
+    {
+      "name": "senior-engineer-guardrails",
+      "source": "./",
+      "description": "Makes AI coding agents work like a careful senior engineer on full-stack web apps, avoiding the mistakes 2026 research measured in AI-written code.",
+      "category": "development",
+      "tags": ["code-quality", "security", "testing", "nextjs", "postgresql"]
+    }
+  ]
+}

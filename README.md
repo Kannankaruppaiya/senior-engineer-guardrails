@@ -23,27 +23,31 @@ senior would reuse, delete or constrain**, and by skipping rules nobody wrote do
 
 Prompt rules alone decay over a session. This skill pairs a working method with
 two scripts that make the important checks mechanical. Every rule is traced to a
-source in [`references/evidence.md`](senior-engineer-guardrails/references/evidence.md).
+source in [`references/evidence.md`](skills/senior-engineer-guardrails/references/evidence.md).
 
 ## What's inside
 
 ```
 .
-├── senior-engineer-guardrails/       # the skill — copy this folder
-│   ├── SKILL.md                      # the workflow: learn → plan → write → verify
-│   ├── references/
-│   │   ├── backend.md                # handlers, errors, validation, transactions, races, SQL, migrations
-│   │   ├── frontend.md               # server/client components, effects, fetching, forms, a11y, styling
-│   │   ├── security.md               # authorization, sessions, secrets, sensitive data, dependencies
-│   │   ├── testing.md                # what to test, assertions that catch bugs, test integrity
-│   │   ├── structure.md              # file size, layering, reuse, deleting code, stray files
-│   │   ├── files-shell-git.md        # safe edits, exit codes, hangs, destructive git
-│   │   ├── review-checklist.md       # 11-point self-review before "done"
-│   │   └── evidence.md               # sources, dates and caveats
-│   └── scripts/
-│       ├── check.sh                  # runs typecheck/lint/test and reports each real exit code
-│       └── scan-ai-smells.sh         # flags AI-typical mistakes in changed files
-└── evals/evals.json                  # test prompts with assertions for evaluating the skill
+├── .claude-plugin/
+│   ├── plugin.json                   # Claude Code plugin manifest
+│   └── marketplace.json              # makes this repo installable as a marketplace
+├── skills/
+│   └── senior-engineer-guardrails/   # the skill itself
+│       ├── SKILL.md                  # the workflow: learn → plan → write → verify
+│       ├── references/
+│       │   ├── backend.md            # handlers, errors, validation, transactions, races, SQL, migrations
+│       │   ├── frontend.md           # server/client components, effects, fetching, forms, a11y, styling
+│       │   ├── security.md           # authorization, sessions, secrets, sensitive data, dependencies
+│       │   ├── testing.md            # what to test, assertions that catch bugs, test integrity
+│       │   ├── structure.md          # file size, layering, reuse, deleting code, stray files
+│       │   ├── files-shell-git.md    # safe edits, exit codes, hangs, destructive git
+│       │   ├── review-checklist.md   # 11-point self-review before "done"
+│       │   └── evidence.md           # sources, dates and caveats
+│       └── scripts/
+│           ├── check.sh              # runs typecheck/lint/test and reports each real exit code
+│           └── scan-ai-smells.sh     # flags AI-typical mistakes in changed files
+└── tests/skill-evals.json            # test prompts with assertions for evaluating the skill
 ```
 
 Each reference shows side-by-side *"AI typically writes"* vs *"senior writes"*
@@ -51,34 +55,68 @@ examples.
 
 ## Install
 
-### Claude Code
+### Claude Code — as a plugin (recommended)
 
-Personal (all projects):
+Inside a Claude Code session:
+
+```
+/plugin marketplace add Kannankaruppaiya/senior-engineer-guardrails
+/plugin install senior-engineer-guardrails@kannankaruppaiya
+```
+
+Or from your shell:
+
+```bash
+claude plugin marketplace add Kannankaruppaiya/senior-engineer-guardrails
+claude plugin install senior-engineer-guardrails@kannankaruppaiya
+```
+
+The skill then loads automatically whenever a task involves code changes. To
+run it explicitly, use `/senior-engineer-guardrails:senior-engineer-guardrails`.
+
+Update later with `claude plugin update senior-engineer-guardrails@kannankaruppaiya`,
+or turn on auto-update for the marketplace in `/plugin`.
+
+**For a whole team:** commit this to your project's `.claude/settings.json` so
+everyone who opens the repo is offered the plugin:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "kannankaruppaiya": {
+      "source": { "source": "github", "repo": "Kannankaruppaiya/senior-engineer-guardrails" }
+    }
+  },
+  "enabledPlugins": {
+    "senior-engineer-guardrails@kannankaruppaiya": true
+  }
+}
+```
+
+### Claude Code — as a plain skill
 
 ```bash
 git clone https://github.com/Kannankaruppaiya/senior-engineer-guardrails.git /tmp/seg
-cp -r /tmp/seg/senior-engineer-guardrails ~/.claude/skills/
+
+# for you, in every project
+cp -r /tmp/seg/skills/senior-engineer-guardrails ~/.claude/skills/
+
+# or for one project, shared through git
+mkdir -p .claude/skills && cp -r /tmp/seg/skills/senior-engineer-guardrails .claude/skills/
 ```
 
-Per project (shared with your team through git):
+Invoke it with `/senior-engineer-guardrails`, or let it load automatically.
 
-```bash
-mkdir -p .claude/skills
-cp -r /tmp/seg/senior-engineer-guardrails .claude/skills/
-```
+### Claude.ai and the Claude apps
 
-The skill loads automatically when a task involves code changes. You can also
-invoke it explicitly with `/senior-engineer-guardrails`.
-
-### Claude.ai / Claude apps
-
-Zip the inner `senior-engineer-guardrails/` folder and upload it under
-**Settings → Capabilities → Skills**.
+Download `senior-engineer-guardrails.skill` from the
+[latest release](https://github.com/Kannankaruppaiya/senior-engineer-guardrails/releases/latest)
+and upload it under **Settings → Capabilities → Skills**.
 
 ### Other agents (Codex CLI, Gemini CLI, Cursor, Copilot, OpenHands …)
 
-Copy the folder into your repository (e.g. `tools/senior-engineer-guardrails/`)
-and add to your `AGENTS.md`:
+Copy `skills/senior-engineer-guardrails/` into your repository (e.g.
+`tools/senior-engineer-guardrails/`) and add to your `AGENTS.md`:
 
 ```markdown
 Before changing code, read tools/senior-engineer-guardrails/SKILL.md and follow it.
@@ -86,6 +124,10 @@ Read the matching file in its references/ folder for the area you are changing.
 ```
 
 ## Using the scripts directly
+
+When the skill is active, the agent runs these itself. You can also run them by
+hand or in CI — the paths below assume the plain-skill install; from a clone of
+this repository use `skills/senior-engineer-guardrails/scripts/` instead.
 
 ```bash
 # Run the project's checks; exit code is non-zero if any check failed
@@ -102,6 +144,20 @@ SERVER_PATHS='^(src/server|services)/' bash .claude/skills/senior-engineer-guard
 
 Both scripts are plain Bash with `git`, `grep` and (for `check.sh`) Node to read
 `package.json`. They are safe to run in CI.
+
+## What this plugin runs and sends
+
+- **Nothing runs automatically.** The plugin contains one skill (Markdown
+  instructions) and two Bash scripts. It has no hooks, no MCP servers, no
+  background processes and no bundled binaries.
+- **The scripts run only when the agent or you call them**, inside your own
+  repository: `check.sh` runs your project's existing `typecheck`, `lint` and
+  `test` package scripts (or the commands you set in `CHECK_COMMANDS`) and
+  writes logs to your temp directory; `scan-ai-smells.sh` runs `git` and `grep`
+  over files you changed. Neither script uses the network, installs packages,
+  or reads credentials.
+- **No data leaves your machine** because of this plugin. It collects no
+  telemetry.
 
 ## Make it stick
 
@@ -121,7 +177,7 @@ results, also:
 - No study yet compares agents with *senior* developers specifically; some rules
   (e.g. about `useEffect` and forms) rest on consistent practitioner reports
   rather than measured rates. See the gaps section of
-  [`evidence.md`](senior-engineer-guardrails/references/evidence.md).
+  [`evidence.md`](skills/senior-engineer-guardrails/references/evidence.md).
 - `scan-ai-smells.sh` is a heuristic grep: expect some false positives, and it
   cannot see missing authorization — that needs tests.
 

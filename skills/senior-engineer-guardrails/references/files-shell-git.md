@@ -39,10 +39,10 @@ Also:
 
 ```bash
 # AI
-npx tsc --noEmit 2>&1 | tail -30
+npm run typecheck 2>&1 | tail -30
 
 # Senior
-npx tsc --noEmit > /tmp/tsc.log 2>&1; status=$?; tail -30 /tmp/tsc.log; echo "exit=$status"
+npm run typecheck > /tmp/typecheck.log 2>&1; status=$?; tail -30 /tmp/typecheck.log; echo "exit=$status"
 ```
 
 `set -o pipefail` helps in scripts you own but can cause false failures with

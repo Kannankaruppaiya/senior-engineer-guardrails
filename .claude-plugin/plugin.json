@@ -1,0 +1,25 @@
+{
+  "name": "senior-engineer-guardrails",
+  "displayName": "Senior Engineer Guardrails",
+  "version": "1.0.0",
+  "description": "Makes AI coding agents work like a careful senior engineer on full-stack web apps, avoiding the mistakes 2026 research measured in AI-written code: missing auth checks, silent errors, race conditions, weak tests, lost files and destructive git.",
+  "author": {
+    "name": "Kannankaruppaiya",
+    "url": "https://github.com/Kannankaruppaiya"
+  },
+  "homepage": "https://github.com/Kannankaruppaiya/senior-engineer-guardrails",
+  "repository": "https://github.com/Kannankaruppaiya/senior-engineer-guardrails",
+  "license": "MIT",
+  "keywords": [
+    "code-quality",
+    "code-review",
+    "security",
+    "best-practices",
+    "nextjs",
+    "react",
+    "postgresql",
+    "typescript",
+    "testing",
+    "ai-coding-agents"
+  ]
+}

@@ -12,7 +12,7 @@
 #   CLIENT_PATHS   regex for client-side code   (default: app/, components/, src/components/, src/app/, hooks/)
 set -u
 
-cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 2
 
 base="${1:-}"
 if [ -z "$base" ]; then

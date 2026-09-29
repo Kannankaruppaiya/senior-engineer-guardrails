@@ -47,8 +47,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   work around the resulting build error.
 - Use the idioms of the installed version. Agents mix in Pages Router APIs
   (`getServerSideProps`, `pages/api`) or APIs from a newer major. Check
-  `package.json` and the installed docs rather than memory; Next.js provides
-  `npx @next/codemod agents-md` to fetch version-matched docs for agents.
+  `package.json` and the installed docs rather than memory. Next.js publishes a
+  codemod that writes version-matched docs for agents into `AGENTS.md` (see the
+  "AI agents" guide on nextjs.org).
 - Don't call `Date.now()`, `Math.random()` or read `localStorage` during render
   of server-rendered components — that causes hydration mismatches.
 

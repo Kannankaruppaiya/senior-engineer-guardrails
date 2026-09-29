@@ -12,4 +12,9 @@
 - `scripts/scan-ai-smells.sh`: flags 19 AI-typical mistake patterns in
   changed files.
 - `references/evidence.md`: sources from May–September 2026.
-- `evals/evals.json`: three evaluation prompts with assertions.
+- `tests/skill-evals.json`: three evaluation prompts with assertions.
+- Installable as a Claude Code plugin from this repository's marketplace:
+  `/plugin marketplace add Kannankaruppaiya/senior-engineer-guardrails`, then
+  `/plugin install senior-engineer-guardrails@kannankaruppaiya`.
+- Release assets: `senior-engineer-guardrails.skill` for claude.ai and a
+  plugin zip for `claude --plugin-dir`.

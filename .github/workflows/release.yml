@@ -1,0 +1,59 @@
+name: Release
+
+# Push a tag like v1.0.0 (matching "version" in .claude-plugin/plugin.json)
+# to publish a GitHub release with the plugin zip and the .skill package.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check the tag matches plugin.json
+        run: |
+          version="$(jq -r .version .claude-plugin/plugin.json)"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match plugin.json version ${version}" >&2
+            exit 1
+          fi
+
+      - name: Build release assets
+        run: |
+          mkdir -p dist
+          # Whole plugin (also a marketplace) — works with `claude --plugin-dir` / `--plugin-url`
+          git archive --format=zip --prefix=senior-engineer-guardrails/ \
+            -o "dist/senior-engineer-guardrails-plugin-${GITHUB_REF_NAME}.zip" HEAD
+          # Skill only — upload to claude.ai, or unzip into ~/.claude/skills/
+          (cd skills && zip -qr ../dist/senior-engineer-guardrails.skill senior-engineer-guardrails)
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -l dist
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## " v "( |$)" { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "No CHANGELOG.md section for ${version}" >&2
+            exit 1
+          fi
+          cat notes.md
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file notes.md \
+            --verify-tag

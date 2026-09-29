@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: JSON files parse
+        run: |
+          for f in .claude-plugin/*.json tests/*.json; do
+            jq empty "$f" && echo "ok  $f"
+          done
+
+      - name: Shell scripts
+        run: |
+          for f in skills/*/scripts/*.sh; do
+            bash -n "$f"
+            test -x "$f" || { echo "$f is not executable" >&2; exit 1; }
+          done
+          shellcheck --severity=warning skills/*/scripts/*.sh
+
+      - name: SKILL.md frontmatter
+        run: |
+          f=skills/senior-engineer-guardrails/SKILL.md
+          head -1 "$f" | grep -qx -- '---'
+          grep -qE '^name: senior-engineer-guardrails$' "$f"
+          desc="$(sed -n 's/^description: //p' "$f")"
+          [ -n "$desc" ] && [ "${#desc}" -le 1024 ] || { echo "description missing or over 1024 chars" >&2; exit 1; }
+
+      - name: Plugin manifests
+        run: |
+          jq -e '.name == "senior-engineer-guardrails" and (.version | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' .claude-plugin/plugin.json
+          jq -e '.plugins[0].name == "senior-engineer-guardrails" and .plugins[0].source == "./"' .claude-plugin/marketplace.json

@@ -5,15 +5,15 @@ Thanks for helping make coding agents safer to work with.
 ## What's most useful
 
 - **New or updated evidence.** A study, benchmark or incident report that
-  supports, refutes or refines a rule. Add it to `senior-engineer-guardrails/references/evidence.md` with a
+  supports, refutes or refines a rule. Add it to `skills/senior-engineer-guardrails/references/evidence.md` with a
   link, publication date and a one-line finding. Label vendor and practitioner
   sources.
 - **Corrections.** Wrong figures, dead links, outdated framework advice.
 - **Rules for other stacks** (Python/Django, Go, Rails, Vue/Svelte, other
-  databases). Add a new `senior-engineer-guardrails/references/<area>.md` and link it from `SKILL.md`.
-- **Scanner patterns** in `senior-engineer-guardrails/scripts/scan-ai-smells.sh` for mistakes you have seen
+  databases). Add a new `skills/senior-engineer-guardrails/references/<area>.md` and link it from `SKILL.md`.
+- **Scanner patterns** in `skills/senior-engineer-guardrails/scripts/scan-ai-smells.sh` for mistakes you have seen
   agents make repeatedly — with a low false-positive rate.
-- **Evals** in `evals/evals.json` that show whether a rule changes agent
+- **Evals** in `tests/skill-evals.json` that show whether a rule changes agent
   behaviour.
 
 ## Guidelines
@@ -36,13 +36,26 @@ Thanks for helping make coding agents safer to work with.
 
 - Run the scripts against a sample repository containing both good and bad
   code, and include the output in your PR.
-- For wording changes to `SKILL.md`, run the prompts in `evals/evals.json` with
+- For wording changes to `SKILL.md`, run the prompts in `tests/skill-evals.json` with
   and without the change and describe the difference.
+- Run `claude plugin validate --strict .` in the repository root before
+  opening a PR (CI checks the manifests, JSON and scripts).
 
 ## Pull requests
 
 - One purpose per PR; describe what changed and why, with sources.
 - Update `CHANGELOG.md` under "Unreleased".
+
+## Releasing (maintainers)
+
+1. Move the "Unreleased" notes in `CHANGELOG.md` under a new `## X.Y.Z — date`
+   heading.
+2. Bump `version` in `.claude-plugin/plugin.json` to `X.Y.Z`. Users on the
+   plugin only receive an update when this changes.
+3. Commit, then tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+   The Release workflow checks the tag matches `plugin.json`, builds the
+   plugin zip and the `.skill` package, and publishes the GitHub release with
+   the CHANGELOG notes.
 
 By contributing, you agree that your contributions are licensed under the MIT
 License.

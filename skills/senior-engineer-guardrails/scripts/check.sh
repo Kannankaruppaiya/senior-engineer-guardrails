@@ -11,7 +11,7 @@
 set -u
 
 root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-cd "$root"
+cd "$root" || exit 2
 logdir="${TMPDIR:-/tmp}/senior-guardrails-checks"
 mkdir -p "$logdir"
 export CI=1   # non-interactive, non-watch mode for most tools
@@ -57,8 +57,9 @@ elif [ -f package.json ]; then
   for s in typecheck type-check tsc; do
     if has_script "$s"; then run typecheck "$pm" run "$s"; break; fi
   done
-  if ! has_script typecheck && ! has_script type-check && ! has_script tsc && [ -f tsconfig.json ]; then
-    run typecheck npx --no-install tsc --noEmit
+  if ! has_script typecheck && ! has_script type-check && ! has_script tsc \
+     && [ -f tsconfig.json ] && [ -x node_modules/.bin/tsc ]; then
+    run typecheck node_modules/.bin/tsc --noEmit
   fi
   has_script lint && run lint "$pm" run lint
   # `test` scripts that start a watcher are neutralised by CI=1 for vitest/jest.
