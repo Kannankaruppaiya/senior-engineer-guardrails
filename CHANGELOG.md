@@ -5,6 +5,7 @@
 - Add a plugin icon (`.claude-plugin/icon.svg`).
 - Reword the shell-safety advice in `files-shell-git.md` so the directory
   scanner no longer reads it as a download-and-run command.
+- Add `PRIVACY.md` and link it from the README.
 
 ## 1.0.0 — 2026-09-29
 

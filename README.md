@@ -159,6 +159,8 @@ Both scripts are plain Bash with `git`, `grep` and (for `check.sh`) Node to read
 - **No data leaves your machine** because of this plugin. It collects no
   telemetry.
 
+[Privacy](PRIVACY.md): the full privacy policy.
+
 ## Make it stick
 
 The research is clear that mechanical enforcement beats instructions. For best
