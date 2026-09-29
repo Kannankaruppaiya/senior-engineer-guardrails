@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="Senior Engineer Guardrails">
+  <rect width="256" height="256" rx="56" fill="#1F2937"/>
+  <path d="M128 40 L200 68 V124 C200 170 170 204 128 220 C86 204 56 170 56 124 V68 Z" fill="#10B981"/>
+  <path d="M128 58 L184 80 V124 C184 160 161 188 128 202 C95 188 72 160 72 124 V80 Z" fill="#064E3B"/>
+  <path d="M100 96 L84 128 L100 160" fill="none" stroke="#ECFDF5" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M156 96 L172 128 L156 160" fill="none" stroke="#ECFDF5" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M110 130 L124 144 L148 114" fill="none" stroke="#6EE7B7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

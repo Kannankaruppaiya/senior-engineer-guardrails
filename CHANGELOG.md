@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a plugin icon (`.claude-plugin/icon.svg`).
+- Reword the shell-safety advice in `files-shell-git.md` so the directory
+  scanner no longer reads it as a download-and-run command.
+
 ## 1.0.0 — 2026-09-29
 
 - First release.

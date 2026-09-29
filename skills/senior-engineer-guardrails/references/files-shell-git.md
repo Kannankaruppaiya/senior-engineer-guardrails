@@ -61,7 +61,8 @@ script file. Prefer the project's package scripts.
 **Portability.** `sed -i` differs between GNU and BSD/macOS; prefer the editor
 tool for file edits.
 
-**Never:** `rm -rf` on computed or broad paths, `curl … | sh`, global installs,
+**Never:** `rm -rf` on computed or broad paths, piping a downloaded script
+straight into a shell, global installs,
 `chmod -R 777`, or commands against production systems. If something
 destructive seems necessary, stop and ask. When an obstacle appears, don't reach
 for the broadest credential or flag available — that is the causal chain behind
