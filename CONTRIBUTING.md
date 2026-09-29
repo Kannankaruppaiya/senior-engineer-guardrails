@@ -52,10 +52,11 @@ Thanks for helping make coding agents safer to work with.
    heading.
 2. Bump `version` in `.claude-plugin/plugin.json` to `X.Y.Z`. Users on the
    plugin only receive an update when this changes.
-3. Commit, then tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-   The Release workflow checks the tag matches `plugin.json`, builds the
-   plugin zip and the `.skill` package, and publishes the GitHub release with
-   the CHANGELOG notes.
+3. Commit and push to `main`, then either push a tag
+   (`git tag vX.Y.Z && git push origin vX.Y.Z`) or run the **Release** workflow
+   by hand from the Actions tab. The workflow checks the version, builds the
+   plugin zip and the `.skill` package, creates the tag if needed, and
+   publishes the GitHub release with the CHANGELOG notes.
 
 By contributing, you agree that your contributions are licensed under the MIT
 License.

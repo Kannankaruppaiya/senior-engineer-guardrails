@@ -1,10 +1,13 @@
 name: Release
 
-# Push a tag like v1.0.0 (matching "version" in .claude-plugin/plugin.json)
-# to publish a GitHub release with the plugin zip and the .skill package.
+# Publishes a GitHub release with the plugin zip and the .skill package.
+# Either push a tag like v1.0.0 that matches "version" in
+# .claude-plugin/plugin.json, or run this workflow by hand (Actions → Release →
+# Run workflow): it then tags the selected commit as v<version> itself.
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,20 +18,30 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Check the tag matches plugin.json
+      - name: Work out the release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           version="$(jq -r .version .claude-plugin/plugin.json)"
-          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
-            echo "Tag ${GITHUB_REF_NAME} does not match plugin.json version ${version}" >&2
+          tag="v${version}"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            if [ "${tag}" != "${GITHUB_REF_NAME}" ]; then
+              echo "Tag ${GITHUB_REF_NAME} does not match plugin.json version ${version}" >&2
+              exit 1
+            fi
+          elif gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release ${tag} already exists — bump version in plugin.json first" >&2
             exit 1
           fi
+          echo "TAG=${tag}" >> "${GITHUB_ENV}"
+          echo "VERSION=${version}" >> "${GITHUB_ENV}"
 
       - name: Build release assets
         run: |
           mkdir -p dist
           # Whole plugin (also a marketplace) — works with `claude --plugin-dir` / `--plugin-url`
           git archive --format=zip --prefix=senior-engineer-guardrails/ \
-            -o "dist/senior-engineer-guardrails-plugin-${GITHUB_REF_NAME}.zip" HEAD
+            -o "dist/senior-engineer-guardrails-plugin-${TAG}.zip" HEAD
           # Skill only — upload to claude.ai, or unzip into ~/.claude/skills/
           (cd skills && zip -qr ../dist/senior-engineer-guardrails.skill senior-engineer-guardrails)
           (cd dist && sha256sum * > SHA256SUMS)
@@ -36,14 +49,13 @@ jobs:
 
       - name: Extract release notes from CHANGELOG.md
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          awk -v v="$version" '
+          awk -v v="$VERSION" '
             $0 ~ "^## " v "( |$)" { found = 1; next }
             found && /^## / { exit }
             found { print }
           ' CHANGELOG.md > notes.md
           if [ ! -s notes.md ]; then
-            echo "No CHANGELOG.md section for ${version}" >&2
+            echo "No CHANGELOG.md section for ${VERSION}" >&2
             exit 1
           fi
           cat notes.md
@@ -52,8 +64,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" dist/* \
+          # On a manual run gh creates the tag on the checked-out commit.
+          gh release create "${TAG}" dist/* \
             --repo "${GITHUB_REPOSITORY}" \
-            --title "${GITHUB_REF_NAME}" \
+            --title "${TAG}" \
             --notes-file notes.md \
-            --verify-tag
+            --target "${GITHUB_SHA}"
