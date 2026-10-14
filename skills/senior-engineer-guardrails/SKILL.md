@@ -3,7 +3,7 @@ name: senior-engineer-guardrails
 description: Makes a coding agent work like a careful senior engineer on full-stack web apps (React/Next.js, Node/TypeScript APIs, SQL/PostgreSQL) and avoid the failure patterns 2026 research measured in AI-written code — missing server-side authorization, silent catch-and-return-default errors, check-then-write races, leaked DB connections, useEffect misuse, forms that lose input or turn "" into 0, 'use client' creep, god components, cloned helpers, stray _v2 files, truncated rewrites, `cmd | tail` hiding failures, destructive git, and unverified "done" claims. Use it for any code change or review in a web app — features, bug fixes, API routes, services, queries, migrations, components, forms, tests, scripts, shell and git work — even when the change looks trivial.
 license: MIT
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   evidence-window: "May–September 2026"
 ---
 

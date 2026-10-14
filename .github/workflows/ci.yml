@@ -26,7 +26,10 @@ jobs:
             bash -n "$f"
             test -x "$f" || { echo "$f is not executable" >&2; exit 1; }
           done
-          shellcheck --severity=warning skills/*/scripts/*.sh
+          shellcheck --severity=warning skills/*/scripts/*.sh tests/*.sh
+
+      - name: Script tests
+        run: bash tests/test-scripts.sh
 
       - name: SKILL.md frontmatter
         run: |

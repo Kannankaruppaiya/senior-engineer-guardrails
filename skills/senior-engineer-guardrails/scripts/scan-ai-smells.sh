@@ -8,8 +8,8 @@
 #   falling back to HEAD (working-tree changes only).
 # Environment:
 #   SMELL_EXCLUDE  extended regex of paths to skip (default skips docs and markdown)
-#   SERVER_PATHS   regex for server-side code   (default: server/, api/, app/api/, pages/api/, src/server/, backend/)
-#   CLIENT_PATHS   regex for client-side code   (default: app/, components/, src/components/, src/app/, hooks/)
+#   SERVER_PATHS   regex for server-side code   (default: server/, api/, app/api/, pages/api/, src/server/, src/app/api/, backend/)
+#   CLIENT_PATHS   regex for client-side code   (default: app/, components/, hooks/, src/app/, src/components/, src/hooks/, src/pages/)
 set -u
 
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 2
@@ -26,12 +26,18 @@ exclude="${SMELL_EXCLUDE:-(^|/)(docs?|reports?)/|\.md$|(^|/)(package-lock\.json|
 server_re="${SERVER_PATHS:-^(server|api|app/api|pages/api|src/server|src/app/api|backend)/}"
 client_re="${CLIENT_PATHS:-^(app|components|hooks|src/app|src/components|src/hooks|src/pages)/}"
 
-files=$(
+changed=$(
   { git diff --name-only --diff-filter=d "$base" -- 2>/dev/null; git ls-files --others --exclude-standard; } \
-    | sort -u | grep -Ev "$exclude" || true
+    | sort -u
 )
+files=$(printf '%s\n' "$changed" | grep -Ev "$exclude" || true)
 
-if [ -z "$files" ]; then
+# Stray files are checked against every changed file: the default exclude skips
+# Markdown, which would hide PLAN.md / NOTES.md / SUMMARY.md.
+stray=$(printf '%s\n' "$changed" \
+  | grep -Ei '(_v[0-9]+|[-_]new|[-_]old|[-_]copy|[-_]backup)(\.[a-z0-9]+)+$|\.(bak|orig|tmp)$|(^|/)(PLAN|NOTES|SUMMARY|TODO|SCRATCH)\.md$|(^|/)debug[-_][^/]*$' || true)
+
+if [ -z "$files" ] && [ -z "$stray" ]; then
   echo "No changed files to scan (base: $base)."
   exit 0
 fi
@@ -100,8 +106,6 @@ if [ -n "$migrations" ]; then
   fi
 fi
 
-stray=$(printf '%s\n' "$files" \
-  | grep -Ei '(_v[0-9]+|[-_]new|[-_]old|[-_]copy|[-_]backup)(\.[a-z0-9]+)+$|\.(bak|orig|tmp)$|(^|/)(PLAN|NOTES|SUMMARY|TODO|SCRATCH)\.md$|(^|/)debug[-_][^/]*$' || true)
 if [ -n "$stray" ]; then
   echo "== Stray / duplicate files (delete, or edit the original in place)"
   printf '%s\n' "$stray" | sed 's/^/   /'
