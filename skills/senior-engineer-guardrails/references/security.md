@@ -8,7 +8,7 @@ stated. Treat the rules below as always stated.
 
 ## Authorization
 
-- Every entry point that reads or changes data checks, on the server:
+- Every protected entry point that reads or changes data checks, on the server:
   1. who the caller is (session/token verified), and
   2. whether they may access **this specific record** (ownership, tenant, role).
 - Checks live in the handler or service, not only in middleware, route matchers
@@ -20,6 +20,9 @@ stated. Treat the rules below as always stated.
   a debug/bypass login route. If auth blocks you, stop and ask.
 - Defence in depth where available: database row-level security, and an app
   database role without DDL rights.
+- Explicit public endpoints still validate inputs, limit abuse and expose only
+  intended public data. See [enterprise](enterprise.md) for tenant isolation,
+  CSRF/CORS/SSRF, audit and privacy lifecycle controls.
 
 ## Input and output
 

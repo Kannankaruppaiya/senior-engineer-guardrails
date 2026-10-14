@@ -1,0 +1,9 @@
+{
+  "name": "senior-engineer-guardrails-validation",
+  "private": true,
+  "scripts": {
+    "lint": "node tests/validate-repo.mjs",
+    "test": "bash tests/scripts.test.sh"
+  },
+  "engines": { "node": ">=22" }
+}

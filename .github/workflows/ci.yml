@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -22,11 +23,14 @@ jobs:
 
       - name: Shell scripts
         run: |
-          for f in skills/*/scripts/*.sh; do
+          for f in skills/*/scripts/*.sh tests/*.sh; do
             bash -n "$f"
             test -x "$f" || { echo "$f is not executable" >&2; exit 1; }
           done
-          shellcheck --severity=warning skills/*/scripts/*.sh
+          shellcheck --severity=warning skills/*/scripts/*.sh tests/*.sh
+
+      - name: Repository and reference validation
+        run: node tests/validate-repo.mjs
 
       - name: SKILL.md frontmatter
         run: |
@@ -40,3 +44,15 @@ jobs:
         run: |
           jq -e '.name == "senior-engineer-guardrails" and (.version | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' .claude-plugin/plugin.json
           jq -e '.plugins[0].name == "senior-engineer-guardrails" and .plugins[0].source == "./"' .claude-plugin/marketplace.json
+
+  behavior:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Execute real script fixtures
+        shell: bash
+        run: bash tests/scripts.test.sh

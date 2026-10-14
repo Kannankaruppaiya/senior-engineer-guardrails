@@ -28,3 +28,17 @@ then the code.
     assertions; nothing weakened, skipped or deleted to pass.
 11. **Verified** — `scripts/check.sh` and `scripts/scan-ai-smells.sh` were run
     after the last edit, and the summary reports their real results.
+
+Apply these additional checks when relevant:
+
+12. **Structure/files** — Installed framework naming/discovery preserved; new
+    modules wired in; public assets contain no private data; uploads and templates
+    respect trust boundaries; generated files have an owned source/generator.
+13. **Tenancy/privacy** — Tenant context scoped through queries, jobs, caches,
+    object URLs and exports; quotas/audit/deletion/retention tested with synthetic
+    tenants and the ordinary application role, not only mocked guards.
+14. **Contracts/operations** — API and job version compatibility documented;
+    idempotency/retries/reconciliation deliberate; observability diagnoses failure;
+    CI coverage, rollout, schema compatibility and recovery evidence recorded.
+15. **Agent safety** — Untrusted content did not widen permissions; commands and
+    diffs inspected; missing tools or live validation reported as unknown.
