@@ -34,8 +34,8 @@ Thanks for helping make coding agents safer to work with.
 
 ## Testing a change
 
-- Run the scripts against a sample repository containing both good and bad
-  code, and include the output in your PR.
+- Run `bash tests/test-scripts.sh`. When you add or change a scanner pattern,
+  add a bad-code line for it there so CI proves it fires.
 - For wording changes to `SKILL.md`, run the prompts in `tests/skill-evals.json` with
   and without the change and describe the difference.
 - Run `claude plugin validate --strict .` in the repository root before

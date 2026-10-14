@@ -47,7 +47,9 @@ source in [`references/evidence.md`](skills/senior-engineer-guardrails/reference
 │       └── scripts/
 │           ├── check.sh              # runs typecheck/lint/test and reports each real exit code
 │           └── scan-ai-smells.sh     # flags AI-typical mistakes in changed files
-└── tests/skill-evals.json            # test prompts with assertions for evaluating the skill
+└── tests/
+    ├── skill-evals.json              # test prompts with assertions for evaluating the skill
+    └── test-scripts.sh               # regression tests for the two scripts (run in CI)
 ```
 
 Each reference shows side-by-side *"AI typically writes"* vs *"senior writes"*
