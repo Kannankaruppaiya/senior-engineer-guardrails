@@ -4,8 +4,9 @@ An [Agent Skill](https://agentskills.io) that makes AI coding agents work like a
 careful senior engineer on full-stack web apps — and avoid the specific mistakes
 that 2026 research measured in AI-written code.
 
-It targets React / Next.js frontends, Node/TypeScript APIs and SQL (PostgreSQL)
-databases, but most rules apply to any web stack.
+It includes React/Next.js, Node/TypeScript and PostgreSQL examples, while the
+core workflow adapts to the installed framework and existing architecture.
+Enterprise and tenant guidance is generic, without domain-specific requirements.
 
 ## Why
 
@@ -22,8 +23,9 @@ senior would reuse, delete or constrain**, and by skipping rules nobody wrote do
 | Grow code instead of reusing it | Copy/paste up; refactoring ("moved" code) down from 21% to 3.8% of changes |
 
 Prompt rules alone decay over a session. This skill pairs a working method with
-two scripts that make the important checks mechanical. Every rule is traced to a
-source in [`references/evidence.md`](skills/senior-engineer-guardrails/references/evidence.md).
+two scripts that make important checks mechanical. Historical research claims
+are collected in [`references/evidence.md`](skills/senior-engineer-guardrails/references/evidence.md);
+additional architecture and operational guidance reflects engineering judgment.
 
 ## What's inside
 
@@ -41,17 +43,21 @@ source in [`references/evidence.md`](skills/senior-engineer-guardrails/reference
 │       │   ├── security.md           # authorization, sessions, secrets, sensitive data, dependencies
 │       │   ├── testing.md            # what to test, assertions that catch bugs, test integrity
 │       │   ├── structure.md          # file size, layering, reuse, deleting code, stray files
+│       │   ├── file-lifecycle.md     # assets, templates, uploads, storage, generated files
+│       │   ├── enterprise.md         # tenancy, security surfaces, privacy lifecycle
+│       │   ├── delivery-operations.md # contracts, queues, CI, deployment, recovery
+│       │   ├── agent-safety.md       # untrusted inputs, permissions, verification
 │       │   ├── files-shell-git.md    # safe edits, exit codes, hangs, destructive git
 │       │   ├── review-checklist.md   # 11-point self-review before "done"
 │       │   └── evidence.md           # sources, dates and caveats
 │       └── scripts/
 │           ├── check.sh              # runs typecheck/lint/test and reports each real exit code
 │           └── scan-ai-smells.sh     # flags AI-typical mistakes in changed files
-└── tests/skill-evals.json            # test prompts with assertions for evaluating the skill
+└── tests/                           # runnable script fixtures, validation and agent eval strategy
 ```
 
-Each reference shows side-by-side *"AI typically writes"* vs *"senior writes"*
-examples.
+Existing backend/frontend references retain side-by-side examples. Targeted
+references add decision guidance without enlarging the skill entrypoint.
 
 ## Install
 
@@ -136,14 +142,43 @@ bash .claude/skills/senior-engineer-guardrails/scripts/check.sh
 # Custom commands (any language)
 CHECK_COMMANDS=$'pytest -q\nruff check .' bash .claude/skills/senior-engineer-guardrails/scripts/check.sh
 
+# Limit monorepo checks when the root already orchestrates its packages
+CHECK_PROJECTS=$'.\napps/api' bash .claude/skills/senior-engineer-guardrails/scripts/check.sh
+
 # Scan files changed since the merge-base with origin/main
 bash .claude/skills/senior-engineer-guardrails/scripts/scan-ai-smells.sh
 bash .claude/skills/senior-engineer-guardrails/scripts/scan-ai-smells.sh origin/develop
 SERVER_PATHS='^(src/server|services)/' bash .claude/skills/senior-engineer-guardrails/scripts/scan-ai-smells.sh
+
+# Inspect the exact index snapshot, or every tracked/untracked source file
+bash .claude/skills/senior-engineer-guardrails/scripts/scan-ai-smells.sh --staged
+bash .claude/skills/senior-engineer-guardrails/scripts/scan-ai-smells.sh --all
 ```
 
-Both scripts are plain Bash with `git`, `grep` and (for `check.sh`) Node to read
-`package.json`. They are safe to run in CI.
+Both scripts use Bash 4.4+, Git and standard shell tools; `check.sh` also uses Node
+to parse package manifests. Repository tests require Node 22+ and Bash. The
+check runner discovers source packages, skips dependency/build/generated folders,
+uses the nearest package-manager declaration or lockfile and runs existing
+typecheck/lint/test/build scripts. Root orchestrators can duplicate child work;
+use `CHECK_PROJECTS` to choose a reviewed set. Custom commands take precedence.
+`CI=1` is set, but scripts must still use non-watch commands themselves.
+
+Checks exit 0 on pass, 1 on a failed check and 2 on setup failure/no checks.
+Logs are unique per invocation/check and kept in a private temporary directory.
+`CHECK_PROJECTS` uses newline-separated directories; automatic discovery supports
+newline names on filesystems that allow them.
+
+The scanner uses NUL-separated paths and literal arguments. Explicit refs use
+the merge-base with HEAD plus current working changes; the default tries
+origin/main, origin/master, then HEAD. Deleted files are excluded, renamed targets
+included, and `--staged` reads index content. It scans complete selected files,
+so unchanged lines in those files may produce hits. Exit 2 reports invalid refs,
+regexes or read errors. Conventional backend/frontend folders are detected at
+any monorepo depth, including `apps/api`; custom path regexes remain supported.
+Credential files are excluded and possible exposed-secret content is redacted.
+
+See [evaluation strategy](tests/EVALUATION.md) for deterministic regression tests
+and the separate baseline/candidate agent evaluation procedure.
 
 ## What this plugin runs and sends
 
@@ -151,13 +186,14 @@ Both scripts are plain Bash with `git`, `grep` and (for `check.sh`) Node to read
   instructions) and two Bash scripts. It has no hooks, no MCP servers, no
   background processes and no bundled binaries.
 - **The scripts run only when the agent or you call them**, inside your own
-  repository: `check.sh` runs your project's existing `typecheck`, `lint` and
-  `test` package scripts (or the commands you set in `CHECK_COMMANDS`) and
+  repository: `check.sh` runs your project's existing `typecheck`, `lint`,
+  `test` and `build` package scripts (or commands set in `CHECK_COMMANDS`) and
   writes logs to your temp directory; `scan-ai-smells.sh` runs `git` and `grep`
-  over files you changed. Neither script uses the network, installs packages,
-  or reads credentials.
-- **No data leaves your machine** because of this plugin. It collects no
-  telemetry.
+  over selected files. The helpers do not install packages or contact a service
+  themselves. Project scripts/custom commands execute with your permissions and
+  may use the network, access files or emit sensitive logs; review them first.
+- The plugin collects no telemetry. Your project's commands and AI provider have
+  their own data handling behavior.
 
 [Privacy](PRIVACY.md): the full privacy policy.
 

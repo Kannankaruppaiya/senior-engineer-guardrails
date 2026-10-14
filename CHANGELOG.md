@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Keep the skill entrypoint concise and framework-aware; add targeted asset,
+  tenant/privacy, API/data/queue/delivery and AI safety references.
+- Extend structure guidance with naming, monorepos, SOLID/DRY/KISS/YAGNI and
+  module ownership; preserve legitimate versioned files and rollout paths.
+- Fix scanner monorepo paths, literal unusual filenames, merge-base selection,
+  staged snapshots, deleted/renamed paths and visible invocation/read failures.
+- Discover root/nested package checks, include builds, respect package-manager
+  declarations/lockfiles and isolate logs across commands and invocations.
+- Add executable behavioral fixtures, repository/reference validation, Linux/
+  Windows CI and a separate reproducible agent evaluation strategy/catalog.
+- Clarify project-command permissions/network behavior and temporary log privacy.
+
 - Add a plugin icon (`.claude-plugin/icon.svg`).
 - Reword the shell-safety advice in `files-shell-git.md` so the directory
   scanner no longer reads it as a download-and-run command.

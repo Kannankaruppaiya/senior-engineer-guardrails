@@ -27,7 +27,7 @@ Thanks for helping make coding agents safer to work with.
    engineer writes, kept short and correct. Test code examples before submitting.
 4. **Stay stack-neutral in `SKILL.md`.** Framework-specific advice goes in the
    reference files.
-5. **Scripts** must stay dependency-light (Bash, git, grep), pass `bash -n` and
+5. **Scripts** must stay dependency-light (Bash, git, standard tools; Node for manifests), pass `bash -n` and
    ShellCheck, and exit non-zero only for real findings or failures.
 6. **Frontmatter** must follow the Agent Skills spec: `name` in lowercase with
    hyphens, `description` under 1024 characters.
@@ -36,8 +36,17 @@ Thanks for helping make coding agents safer to work with.
 
 - Run the scripts against a sample repository containing both good and bad
   code, and include the output in your PR.
+- Run `node tests/validate-repo.mjs`, `bash tests/scripts.test.sh` and
+  `bash skills/senior-engineer-guardrails/scripts/check.sh`. Behavioral tests
+  execute real Git/grep helpers and use fake package-manager executables only
+  to assert dispatch, environment, exit status and package coverage safely.
+  Linux CI covers filename/symlink cases unavailable on Windows.
+- Pull requests run repository validation, ShellCheck and both OS behavioral
+  jobs; the release workflow reuses those gates before creating release assets.
 - For wording changes to `SKILL.md`, run the prompts in `tests/skill-evals.json` with
-  and without the change and describe the difference.
+  and without the change using `tests/EVALUATION.md`, recording checks and tool
+  traces. If the model/infrastructure harness is unavailable, say **not run**;
+  parsing the prompt catalog is not an agent evaluation.
 - Run `claude plugin validate --strict .` in the repository root before
   opening a PR (CI checks the manifests, JSON and scripts).
 

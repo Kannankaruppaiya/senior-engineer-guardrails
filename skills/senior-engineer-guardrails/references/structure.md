@@ -10,8 +10,8 @@ in 2022 to 3.8% in 2026 while copy/paste rose to 15.7%. More capable models wrot
 ## File and function size
 
 - Aim for files under ~300 lines and functions under ~50. When a file you touch is
-  already large, don't append another block — extract the part you are changing
-  into a well-named module beside it.
+  already large, use responsibility and coupling to decide whether extraction
+  helps this task; size is a review signal, not permission for unrelated refactors.
 - Pages/controllers stay thin: load data, call services, compose components.
 - A module mixing data access, validation, business rules and presentation is a
   signal to split.
@@ -52,17 +52,18 @@ or fallback instead. That leaves two reachable implementations of one rule.
 
 - Replace means delete: remove the old function/component/route and update every
   caller in the same change.
-- No feature flags, `legacy` branches or fallbacks unless the task asks for a
-  staged rollout.
+- Keep compatibility paths/feature flags when a safe migration needs them;
+  document their owner, expiry and removal conditions. Avoid permanent parallel
+  implementations without a compatibility requirement.
 - Remove unused imports, exports and variables you created (`knip`,
   `ts-prune`).
 
 ## No stray files
 
-Never leave `*_v2.*`, `*_new.*`, `*.bak`, `*.old`, "copy" files, `PLAN.md`,
-`NOTES.md`, `SUMMARY.md`, debug output or one-off scripts in the repository — the
-next agent session reads them as project truth. Keep scratch work outside the
-repo; put plans and summaries in your reply.
+Avoid accidental `*_v2.*`, `*_new.*`, `*.bak`, `*.old`, copy files and debug
+output. Keep scratch work outside the repo. Preserve intentional versioned
+contracts/assets, maintained tools and canonical planning documents; a scanner
+filename hit requires review, not automatic deletion.
 
 ## Keep diffs reviewable
 
@@ -83,3 +84,58 @@ repo; put plans and summaries in your reply.
   noisy rules cut compliance with the real ones from 65.6% to 41.5%.
 - When a rule keeps being broken, turn it into a lint rule, test or hook instead
   of adding more prose.
+
+## Framework-aware folders and names
+
+Inspect the installed framework, route discovery and current tree before
+choosing placement. Preserve working structure; these are options, not a demand
+to reorganize an existing app. New projects should start with only needed layers.
+
+| Project | Conventional placement and constraints |
+|---|---|
+| Next.js App Router | `app/` or `src/app/` for `page`, `layout`, `route`, loading/error boundaries; feature code alongside or in established features; private server modules outside client import paths |
+| Next.js Pages Router | `pages/` and `pages/api/`; keep its installed conventions, do not migrate routers incidentally |
+| React/Vite | `src/` with feature modules, shared UI and API clients; `public/` for intentionally public unbundled files; no invented Next.js routing/server conventions |
+| Node APIs | Existing `src/modules/<feature>/` or routes/services/repositories; request adapters depend on services, services on owned data access/contracts |
+| Django/Rails | Framework apps/models/views/templates/migrations or established service objects; preserve framework discovery and naming rather than imposing a JavaScript folder tree |
+| Go | Existing module/packages; `cmd/` entrypoints and `internal/` where appropriate; avoid unnecessary package splits/circular dependencies |
+| Monorepo | `apps/web`, `apps/api`, `packages/<owned capability>` (or existing equivalents); explicit package exports, dependency direction and independent checks |
+
+Example minimal monorepo when both runtimes actually exist:
+
+```text
+apps/web/src/features/orders/  # presentation and browser-facing client
+apps/api/src/modules/orders/   # request adapter, service, data access
+packages/contracts/           # public schemas/types; no server/database imports
+```
+
+Keep tests adjacent or in the existing test hierarchy. Keep framework-reserved
+filenames exact. Components/types commonly use PascalCase, functions/variables
+camelCase and package names kebab-case; Python/SQL often use snake_case. Follow
+the repository, including casing on Linux, rather than mixing naming styles.
+Name by capability/responsibility; avoid an unowned global `utils` dumping ground.
+See [file lifecycle](file-lifecycle.md) for runtime files and generated artifacts.
+
+## SOLID, DRY, KISS and YAGNI in practice
+
+- **Single responsibility:** separate business decisions from transport and
+  persistence when they change independently. A service should not render UI.
+- **Open/closed:** add an extension point for demonstrated variants, not a
+  speculative plugin framework for one implementation.
+- **Liskov substitution:** adapters preserve the contract's failures, ordering,
+  side effects and semantics; a fake store must not silently ignore constraints.
+- **Interface segregation:** callers use small capability contracts rather than
+  a giant shared service; share public DTOs, not private ORM entities.
+- **Dependency inversion:** domain rules depend on owned interfaces where
+  infrastructure variation/testing justifies them; framework adapters live at
+  the edge. Do not wrap every function in an interface by default.
+- **DRY:** reuse the authoritative business rule, not every coincidental similar
+  shape. Two independent domains may need separate models as they evolve.
+- **KISS/YAGNI:** choose the simplest complete implementation that meets current
+  requirements. Extra layers, generic factories and options need a present use.
+
+Modules own their data and expose deliberate APIs. Avoid deep imports, circular
+dependencies and cross-feature writes that bypass invariants. Shared packages
+must not pull privileged server dependencies into clients. Use existing boundary
+lint/import checks and contract tests; document significant decisions with a
+small ADR when alternatives or constraints need to survive the session.
