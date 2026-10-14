@@ -6,6 +6,9 @@
 - Reword the shell-safety advice in `files-shell-git.md` so the directory
   scanner no longer reads it as a download-and-run command.
 - Add `PRIVACY.md` and link it from the README.
+- Fix `scan-ai-smells.sh` never reporting stray `PLAN.md` / `NOTES.md` /
+  `SUMMARY.md` files: the default exclude dropped Markdown before the
+  stray-file check ran.
 
 ## 1.0.0 — 2026-09-29
 
