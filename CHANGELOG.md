@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.1 — 2026-10-14
+
 - Add a plugin icon (`.claude-plugin/icon.svg`).
 - Reword the shell-safety advice in `files-shell-git.md` so the directory
   scanner no longer reads it as a download-and-run command.
@@ -9,6 +11,8 @@
 - Fix `scan-ai-smells.sh` never reporting stray `PLAN.md` / `NOTES.md` /
   `SUMMARY.md` files: the default exclude dropped Markdown before the
   stray-file check ran.
+- Add `tests/test-scripts.sh`, run in CI: checks that every scanner pattern
+  fires on bad code, clean code passes, and `check.sh` reports real exit codes.
 
 ## 1.0.0 — 2026-09-29
 
